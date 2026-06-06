@@ -16,7 +16,7 @@ def keep_alive(): Thread(target=run).start()
 # --- إعدادات البوت ---
 TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 SUGGESTIONS_CHANNEL_ID = 1511935406739034273  # آيدي روم الاقتراحات اللي يرسل فيها الناس
-ADMIN_CHANNEL_ID =  1512686395351629825      # آيدي روم الإدارة (للاقتراحات والتقديمات)
+ADMIN_CHANNEL_ID =  1512689809150312468      # آيدي روم الإدارة (للاقتراحات والتقديمات)
 
 # --- نظام التقديم (Modal) ---
 class ApplyModal(discord.ui.Modal, title='استمارة تقديم الجمارك'):
