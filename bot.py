@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import os
+import requests
 from flask import Flask
 from threading import Thread
 
@@ -86,12 +87,36 @@ bot = MyBot()
 @bot.event
 async def on_message(message):
     if message.author == bot.user: return
+    
+    # معالجة الأوامر العادية (علامة التعجب) أولاً لمنع تعطل أمر الفحص
+    await bot.process_commands(message)
+    
     if message.channel.id == SUGGESTIONS_CHANNEL_ID:
         admin_channel = bot.get_channel(ADMIN_CHANNEL_ID)
         embed = discord.Embed(title="💡 اقتراح جديد", description=message.content, color=discord.Color.gold())
         embed.set_footer(text=f"بواسطة: {message.author}")
         await admin_channel.send(embed=embed)
         await message.delete()
+
+# --- أمر فحص اليوزرات ---
+@bot.command(name="فحص")
+async def check_user(ctx, username: str):
+    username = username.lower()
+    url = f"https://www.instagram.com/{username}/"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=5)
+        if response.status_code == 404:
+            await ctx.send(f"🎯 **{username}** | غالباً متاح وكشخة! الحق عليه وسجله بسرعة.🏃‍♂️")
+        elif response.status_code == 200:
+            await ctx.send(f"❌ **{username}** | اليوزر هذا مستخدم ومأخوذ من قبل.")
+        else:
+            await ctx.send("⚠️ تعذر الفحص حالياً، جرب مرة ثانية بعد شوي.")
+    except requests.exceptions.RequestException:
+        await ctx.send("❌ حدث خطأ أثناء الاتصال بالشبكة.")
 
 # --- أمر تفعيل لوحة العقود ---
 @bot.tree.command(name="setup_contract", description="إرسال لوحة تسجيل العقود")
